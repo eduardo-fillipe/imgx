@@ -1,6 +1,6 @@
 from typing import NamedTuple
-from imgx.image_types.image import Printable
-from imgx.image_types.image import Image
+from imgx.types.image import Printable
+from imgx.types.image import Image
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 import math

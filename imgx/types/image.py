@@ -15,7 +15,7 @@ class Printable:
 
 class Image(Printable):
     def __init__(self, name: str, origin_file_path: str, dimensions: tuple[int, int], max_pixel_color: int,
-                 channels_number: int = 3, description: str = 'This is a image_types', comments: list[str] = '',
+                 channels_number: int = 3, description: str = 'This is a types', comments: list[str] = '',
                  raw_data: np.ndarray = None):
         self.name = name
         self.origin_file_path = origin_file_path

@@ -1,5 +1,5 @@
 import numpy as np
-from imgx.image_types.image import PPMImage
+from imgx.types.image import PPMImage
 
 
 def load_as_ppm(file_path: str) -> PPMImage:

@@ -1,7 +1,7 @@
-from imgx.image_io.load import load_as_ppm
-from imgx.image_io.save import save_as_ppm
-from imgx.image_io import visualization as vf
-from imgx.image_io.visualization import PrintableAxe
+from imgx.io.load import load_as_ppm
+from imgx.io.save import save_as_ppm
+from imgx.io import visualization as vf
+from imgx.io.visualization import PrintableAxe
 
 if __name__ == '__main__':
     img = load_as_ppm('../image_samples/pimentoes.pgm')

@@ -1,5 +1,5 @@
-from imgx.image_io.load import load_as_ppm
-from imgx.image_io import visualization as vs
+from imgx.io.load import load_as_ppm
+from imgx.io import visualization as vs
 from imgx.mask.masks import AverageSpatialMask, MedianSpatialMask, IdentitySpatialMask
 
 if __name__ == '__main__':

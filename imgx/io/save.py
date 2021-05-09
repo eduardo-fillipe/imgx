@@ -1,4 +1,4 @@
-from imgx.image_types.image import PPMImage
+from imgx.types.image import PPMImage
 
 
 def save_as_ppm(img: PPMImage, output_file: str):
