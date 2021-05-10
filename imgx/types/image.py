@@ -95,13 +95,13 @@ class PPMImage(Image):
 
     def histogram_equalized(self) -> 'PPMImage':
         histogram = self.get_pixel_histogram()
-        p = histogram / sum(histogram)  # Nesse ponto, p é o vetor de probabilidades
-        print(p)
+        p = histogram / np.sum(histogram)  # Nesse ponto, p é o vetor de probabilidades
+
         g = np.zeros(self.max_pixel_color + 1)
         g[0] = p[0]
         for i in range(1, len(p)):
             g[i] = p[i] + g[i - 1]
-
+        print(g)
         # Nesse ponto, g é o vetor de probabilidades acumuladas
         # Equalização das cores
         equalized_colors = np.array([round(c * self.max_pixel_color) for c in g], dtype=int)
