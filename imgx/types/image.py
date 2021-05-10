@@ -106,9 +106,9 @@ class Image(Printable):
                         histogram[k][self.data[i, j, k]] += 1
         else:
             histogram = np.zeros(self.max_channel_color + 1, dtype=int)
-            for color in self.data:
-                histogram[color] += 1
-
+            for i in range(self.dimensions[0]):
+                for j in range(self.dimensions[1]):
+                    histogram[self.data[i, j]] += 1
         return histogram
 
     def histogram_equalized(self) -> 'Image':
@@ -137,7 +137,6 @@ class Image(Printable):
             g[0] = p[0]
             for i in range(1, len(p)):
                 g[i] = p[i] + g[i - 1]
-            print(g)
             equalized_colors = np.array([round(c * self.max_channel_color) for c in g], dtype=int)
             equalized_image = np.array([equalized_colors[original_color] for original_color in self.data], dtype=int)
 
