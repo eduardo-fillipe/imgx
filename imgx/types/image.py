@@ -36,7 +36,7 @@ class Image(Printable):
             raise ValueError(f'Invalid image data dimensions: {data.shape}')
 
         self.__data = data
-        self.__dimensions = (data.shape[0], data.shape[0])
+        self.__dimensions = (data.shape[0], data.shape[1])
         self.__channels_number = 1 if len(data.shape) == 2 else data.shape[2]
 
     @property
@@ -72,7 +72,7 @@ class Image(Printable):
     def negative(self) -> 'Image':
         new_image = deepcopy(self)
         if self.is_rgb:
-            new_image.data = self.max_channel_color[:, :, :3] - self.data
+            new_image.data = self.max_channel_color - self.data[:, :, :3]
         else:
             new_image.data = self.max_channel_color - self.data
         return new_image
@@ -145,7 +145,11 @@ class Image(Printable):
         return result
 
     def plot_on_axe(self, ax: axes.Axes):
-        ax.imshow(self.data, cmap='gray', interpolation='none', vmax=self.max_channel_color, vmin=0)
+        if self.is_rgb:
+            reshaped = self.data.reshape((self.dimensions[1], self.dimensions[0], 3))
+        else:
+            reshaped = self.data.reshape((self.dimensions[1], self.dimensions[0]))
+        ax.imshow(reshaped, cmap='gray', interpolation='none', vmax=self.max_channel_color, vmin=0)
 
     def plot_histogram_on_axe(self, ax: axes.Axes):
         if self.is_rgb:
