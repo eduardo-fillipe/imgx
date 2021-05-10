@@ -137,7 +137,7 @@ class Image(Printable):
             g[0] = p[0]
             for i in range(1, len(p)):
                 g[i] = p[i] + g[i - 1]
-
+            print(g)
             equalized_colors = np.array([round(c * self.max_channel_color) for c in g], dtype=int)
             equalized_image = np.array([equalized_colors[original_color] for original_color in self.data], dtype=int)
 
@@ -146,7 +146,7 @@ class Image(Printable):
         return result
 
     def plot_on_axe(self, ax: axes.Axes):
-        ax.imshow(self.data, cmap='gray', interpolation='none')
+        ax.imshow(self.data, cmap='gray', interpolation='none', vmax=self.max_channel_color, vmin=0)
 
     def plot_histogram_on_axe(self, ax: axes.Axes):
         if self.is_rgb:
