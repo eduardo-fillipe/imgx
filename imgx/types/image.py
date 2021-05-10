@@ -96,6 +96,7 @@ class PPMImage(Image):
     def histogram_equalized(self) -> 'PPMImage':
         histogram = self.get_pixel_histogram()
         p = histogram / sum(histogram)  # Nesse ponto, p é o vetor de probabilidades
+        print(p)
         g = np.zeros(self.max_pixel_color + 1)
         g[0] = p[0]
         for i in range(1, len(p)):
@@ -114,7 +115,7 @@ class PPMImage(Image):
     def plot_on_axe(self, ax: axes.Axes):
         ax.imshow(self.raw_data.reshape(self.dimensions if self.channels_number == 1
                                         else (self.dimensions[0], self.dimensions[1], self.channels_number)),
-                  cmap='gray', interpolation='none')
+                  cmap='gray', interpolation='none', vmax=self.max_pixel_color)
 
     def plot_histogram_on_axe(self, ax: axes.Axes):
         sns.histplot(self.raw_data, discrete=True, ax=ax)
