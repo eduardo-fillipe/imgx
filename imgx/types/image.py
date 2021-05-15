@@ -3,6 +3,7 @@ import matplotlib.axes as axes
 import seaborn as sns
 from copy import copy, deepcopy
 from imgx.mask.masks import SpatialMask
+from enum import Enum
 
 
 class Printable:
@@ -13,17 +14,26 @@ class Printable:
         pass
 
 
+class ImageColorType(Enum):
+    BINARY = 'binary'
+    SHADES_OF_GRAY = 'gray'
+    RGB = 'rgb'
+    RGBA = 'rgba'
+
+
 class Image(Printable):
     def __init__(self, data: np.ndarray, max_channel_color: int,
+                 color_type: ImageColorType = None,
                  name: str = None,
                  origin_file_path: str = None,
                  description: str = 'This is a image.',
-                 comments: list[str] = None,
+                 comments: list[str] = None
                  ):
         self.name = name
         self.origin_file_path = origin_file_path
         self.description = description
         self.comments = comments
+
         if max_channel_color is None or max_channel_color < 0:
             raise ValueError('Invalid max_channel_color.')
 
@@ -38,6 +48,13 @@ class Image(Printable):
         self.__data = data
         self.__dimensions = (data.shape[0], data.shape[1])
         self.__channels_number = 1 if len(data.shape) == 2 else data.shape[2]
+
+        if color_type is None:
+            self.__color_type = ImageColorType.SHADES_OF_GRAY if self.__channels_number == 1 \
+                else ImageColorType.RGB if self.__channels_number == 3 \
+                else ImageColorType.RGBA
+        else:
+            self.__color_type = color_type
 
     @property
     def dimensions(self) -> tuple[int, int]:
@@ -56,8 +73,12 @@ class Image(Printable):
         return self.__data
 
     @property
-    def is_rgb(self):
-        return self.channels_number >= 3
+    def is_rgb(self) -> bool:
+        return self.__color_type == ImageColorType.RGB
+
+    @property
+    def color_type(self) -> ImageColorType:
+        return self.__color_type
 
     @data.setter
     def data(self, new_data: np.ndarray):
@@ -146,10 +167,10 @@ class Image(Printable):
 
     def plot_on_axe(self, ax: axes.Axes):
         if self.is_rgb:
-            reshaped = self.data.reshape((self.dimensions[1], self.dimensions[0], 3))
+            reshaped = self.data.reshape((self.dimensions[1], self.dimensions[0], self.channels_number))
         else:
             reshaped = self.data.reshape((self.dimensions[1], self.dimensions[0]))
-        ax.imshow(reshaped, cmap='gray', interpolation='none', vmax=self.max_channel_color, vmin=0)
+        ax.imshow(reshaped, cmap=self.color_type.value, interpolation='none', vmax=self.max_channel_color, vmin=0)
 
     def plot_histogram_on_axe(self, ax: axes.Axes):
         if self.is_rgb:

@@ -1,5 +1,18 @@
 import numpy as np
-from imgx.types.image import Image
+from imgx.types.image import Image, ImageColorType as Ct
+
+
+def get_type_from_bpm(bpm_type: str) -> Ct:
+    if bpm_type == 'P1':
+        return Ct.BINARY
+
+    if bpm_type == 'P2':
+        return Ct.SHADES_OF_GRAY
+
+    if bpm_type == 'P3':
+        return Ct.RGB
+
+    raise ValueError("Invalid bmp_type.")
 
 
 def load_as_ppm(file_path: str) -> Image:
@@ -7,8 +20,9 @@ def load_as_ppm(file_path: str) -> Image:
         lines = list(map(lambda x: x.rstrip(), file.readlines()))
         img_type = lines[0]
 
+        color_type: Ct = get_type_from_bpm(img_type)
         img_channels_number = 1
-        if img_type == 'P3':
+        if color_type == Ct.RGB:
             img_channels_number = 3
 
         img_comments: list[str] = []
@@ -34,7 +48,7 @@ def load_as_ppm(file_path: str) -> Image:
         name_index = file_path.split('/')
         name = file_path if len(name_index) == 0 else name_index[-1]
 
-        result_img = Image(data=result_payload, max_channel_color=max_pixel_color,
+        result_img = Image(data=result_payload, max_channel_color=max_pixel_color, color_type=color_type,
                            name=name,
                            origin_file_path=file_path,
                            comments=img_comments)
