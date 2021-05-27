@@ -34,12 +34,19 @@ def load_as_ppm(file_path: str) -> Image:
             comment = lines[index]
 
         dimensions = [int(i) for i in lines[index].split(' ')]
+        dimensions[0], dimensions[1] = dimensions[1], dimensions[0]
         index += 1
 
-        max_pixel_color = int(lines[index])
-        index += 1
+        if color_type == Ct.BINARY:
+            max_pixel_color = 1
+        else:
+            max_pixel_color = int(lines[index])
+            index += 1
 
-        data = list(map(lambda x: str(x).split(' '), lines[index:]))
+        data = list(map(lambda x: str(x).split(' ')
+                        if color_type != Ct.BINARY
+                        else list(filter(lambda c: c in ['1', '0'], list(x))),
+                    lines[index:]))
         payload = np.array([int(color) for colors in data for color in colors if len(color) > 0])
 
         result_payload = payload.reshape((dimensions[0], dimensions[1])) if img_channels_number == 1 \

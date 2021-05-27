@@ -77,8 +77,8 @@ class SpatialMask:
             j_start, j_stop = padding, n - padding
 
             w_image = image_matrix.copy()
-            for i in range(i_start, i_stop + 1):
-                for j in range(j_start, j_stop + 1):
+            for i in range(i_start, i_stop):
+                for j in range(j_start, j_stop):
                     image_matrix[i, j] = self._apply_on_pixel(w_image, (i, j))
 
             return image_matrix[i_start:i_stop, j_start:j_stop]
