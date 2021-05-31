@@ -210,12 +210,18 @@ class MedianSpatialMask(SpatialMask):
                 Default: 50
     """
 
+    def __init__(self, size: int = 3, overlap_strategy: OverlapStrategy = OverlapStrategy.CROP, params: dict = None):
+        try:
+            order = params['order']
+        except KeyError:
+            order = 50
+
+        super().__init__(size, overlap_strategy, {'order': order})
+
     def _apply_on_pixel(self, image_matrix: np.ndarray, padding: int, is_rgb: bool,
                         target_pixel: tuple[int, int]) -> object:
-        try:
-            percentile = self.params['order']
-        except KeyError:
-            percentile = 50
+
+        percentile = self.params['order']
 
         i_start, i_stop = target_pixel[0] - padding, target_pixel[0] + padding
         j_start, j_stop = target_pixel[1] - padding, target_pixel[1] + padding
