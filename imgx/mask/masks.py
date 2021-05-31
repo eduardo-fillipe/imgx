@@ -61,14 +61,15 @@ class SpatialMask:
                                        _get_padding_strategy_value(max_pixel_color, self.overlap_strategy))
             for i in range(m):
                 for j in range(n):
-                    image_matrix[i, j] = self._apply_on_pixel(padded_matrix, (i + padding, j + padding))
+                    image_matrix[i, j] = self._apply_on_pixel(padded_matrix, padding, is_rgb,
+                                                              (i + padding, j + padding))
             return image_matrix
 
         elif self.overlap_strategy == OverlapStrategy.PARTIAL_APPLY:  # if the strategy is to apply partially
             w_image = image_matrix.copy()
             for i in range(m):
                 for j in range(n):
-                    image_matrix[i, j] = self._apply_on_pixel_partially(w_image, (i, j))
+                    image_matrix[i, j] = self._apply_on_pixel_partially(w_image, padding, is_rgb, (i, j))
 
             return image_matrix
 
@@ -79,13 +80,14 @@ class SpatialMask:
             w_image = image_matrix.copy()
             for i in range(i_start, i_stop):
                 for j in range(j_start, j_stop):
-                    image_matrix[i, j] = self._apply_on_pixel(w_image, (i, j))
+                    image_matrix[i, j] = self._apply_on_pixel(w_image, padding, is_rgb, (i, j))
 
             return image_matrix[i_start:i_stop, j_start:j_stop]
 
         return image_matrix
 
-    def _apply_on_pixel(self, image_matrix: np.ndarray, target_pixel: tuple[int, int]) -> object:
+    def _apply_on_pixel(self, image_matrix: np.ndarray, padding: int, is_rgb: bool,
+                        target_pixel: tuple[int, int]) -> object:
         """
         This method apply the mask to a specific pixel. It is only called for pixels such that the mask does not
             extend beyond(Overlaps) the edges of the image.
@@ -93,11 +95,13 @@ class SpatialMask:
             each pixel is an integer. Otherwise, each pixel is a tuple formed by the channels of the image
             where the first 3 positions of this tuple are de color channels, RGB, respectively.
         :param target_pixel: The pixel that is center of the mask.
+        :param padding: The number of pixels that overlaps the image's bounds when the mask is applied to a pixel on it.
         :return: A tuple (R,G,B) or a int, that represents the new pixel color
         """
         pass
 
-    def _apply_on_pixel_partially(self, image_matrix: np.ndarray, target_pixel: tuple[int, int]) -> object:
+    def _apply_on_pixel_partially(self, image_matrix: np.ndarray, padding: int, is_rgb: bool,
+                                  target_pixel: tuple[int, int]) -> object:
         """
         This method apply the mask around a pixel and returns the new value for that pixel, however is no guarantee that
             the target_pixel is a pixel such that the mask applied on it do not overlaps the image, so the application
@@ -106,6 +110,7 @@ class SpatialMask:
             each pixel is an integer. Otherwise, each pixel is a tuple formed by the channels of the image
             where the first 3 positions of this tuple are de color channels, RGB, respectively.
         :param target_pixel: The pixel that is center of the mask.
+        :param padding: The number of pixels that overlaps the image's bounds when the mask is applied to a pixel on it.
         :return: A tuple (R,G,B) or a int, that represents the new pixel color
         """
         pass
@@ -145,18 +150,18 @@ class IdentitySpatialMask(SpatialMask):
 
 
 class AverageSpatialMask(SpatialMask):
-    def _apply_on_pixel(self, image_matrix: np.ndarray, target_pixel: tuple[int, int]) -> object:
-        d = (self.size - 1) // 2
+    def _apply_on_pixel(self, image_matrix: np.ndarray, padding: int, is_rgb: bool,
+                        target_pixel: tuple[int, int]) -> object:
         area = (self.size * self.size)
-        i_start, i_stop = target_pixel[0] - d, target_pixel[0] + d
-        j_start, j_stop = target_pixel[1] - d, target_pixel[1] + d
+        i_start, i_stop = target_pixel[0] - padding, target_pixel[0] + padding
+        j_start, j_stop = target_pixel[1] - padding, target_pixel[1] + padding
 
-        if is_matrix_rgb(image_matrix):
+        if is_rgb:
             sub_matrix = image_matrix[i_start:i_stop + 1, j_start:j_stop + 1, :3]
         else:
             sub_matrix = image_matrix[i_start:i_stop + 1, j_start:j_stop + 1]
 
-        if is_matrix_rgb(image_matrix) > 2:
+        if is_rgb:
             r_pixel = image_matrix[target_pixel[0], target_pixel[1]].copy()
             r_pixel[:3] = np.sum(sub_matrix, axis=(0, 1))
             return r_pixel
@@ -164,16 +169,16 @@ class AverageSpatialMask(SpatialMask):
             result = int(np.sum((sub_matrix * (1 / area))))
             return result
 
-    def _apply_on_pixel_partially(self, image_matrix: np.ndarray, target_pixel: tuple[int, int]) -> object:
-        d = (self.size - 1) // 2
+    def _apply_on_pixel_partially(self, image_matrix: np.ndarray, padding: int, is_rgb: bool,
+                                  target_pixel: tuple[int, int]) -> object:
         area = 0
-        if is_matrix_rgb(image_matrix):
+        if is_rgb:
             total = np.zeros(3, dtype=int)
         else:
             total = 0
 
-        i_start, i_stop = target_pixel[0] - d, target_pixel[0] + d
-        j_start, j_stop = target_pixel[1] - d, target_pixel[1] + d
+        i_start, i_stop = target_pixel[0] - padding, target_pixel[0] + padding
+        j_start, j_stop = target_pixel[1] - padding, target_pixel[1] + padding
 
         for i in range(i_start, i_stop + 1):
             if 0 <= i < image_matrix.shape[0]:
@@ -186,7 +191,7 @@ class AverageSpatialMask(SpatialMask):
                             total += image_matrix[i, j]
 
         if area > 0:
-            if is_matrix_rgb(image_matrix):
+            if is_rgb:
                 r_pixel = image_matrix[target_pixel[0], target_pixel[1]].copy()
                 r_pixel[:3] = total//area
                 return r_pixel
@@ -205,16 +210,15 @@ class MedianSpatialMask(SpatialMask):
                 Default: 50
     """
 
-    def _apply_on_pixel(self, image_matrix: np.ndarray, target_pixel: tuple[int, int]) -> object:
+    def _apply_on_pixel(self, image_matrix: np.ndarray, padding: int, is_rgb: bool,
+                        target_pixel: tuple[int, int]) -> object:
         try:
             percentile = self.params['order']
         except KeyError:
             percentile = 50
 
-        is_rgb = is_matrix_rgb(image_matrix)
-        d = (self.size - 1) // 2
-        i_start, i_stop = target_pixel[0] - d, target_pixel[0] + d
-        j_start, j_stop = target_pixel[1] - d, target_pixel[1] + d
+        i_start, i_stop = target_pixel[0] - padding, target_pixel[0] + padding
+        j_start, j_stop = target_pixel[1] - padding, target_pixel[1] + padding
 
         if is_rgb:
             sub_matrix = image_matrix[i_start:i_stop + 1, j_start:j_stop + 1, :3].reshape(-1, 3)
@@ -227,16 +231,15 @@ class MedianSpatialMask(SpatialMask):
             result = int(np.percentile(sub_matrix, percentile))
             return result
 
-    def _apply_on_pixel_partially(self, image_matrix: np.ndarray, target_pixel: tuple[int, int]) -> object:
+    def _apply_on_pixel_partially(self, image_matrix: np.ndarray, padding: int, is_rgb: bool,
+                                  target_pixel: tuple[int, int]) -> object:
         try:
             percentile = self.params['order']
         except KeyError:
             percentile = 50
 
-        is_rgb = is_matrix_rgb(image_matrix)
-        d = (self.size - 1) // 2
-        i_start, i_stop = target_pixel[0] - d, target_pixel[0] + d
-        j_start, j_stop = target_pixel[1] - d, target_pixel[1] + d
+        i_start, i_stop = target_pixel[0] - padding, target_pixel[0] + padding
+        j_start, j_stop = target_pixel[1] - padding, target_pixel[1] + padding
 
         valid_pixels = []
         for i in range(i_start, i_stop + 1):
