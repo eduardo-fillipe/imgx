@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='imgx',
     description='A image processing framework built on top of numpy.',
-    version='1.2.0',
+    version='1.2.1',
     license='GPLv3',
     author='Eduardo Fillipe da Silva Reis',
     author_email='eduardo556@live.com',
