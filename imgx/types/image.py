@@ -3,7 +3,7 @@ import matplotlib.axes as axes
 import seaborn as sns
 from copy import copy, deepcopy
 from imgx.mask.masks import SpatialMask
-from enum import Enum
+from imgx.types.image_color_type import ImageColorType
 
 
 class Printable:
@@ -12,13 +12,6 @@ class Printable:
 
     def plot_histogram_on_axe(self, ax: axes.Axes):
         pass
-
-
-class ImageColorType(Enum):
-    BINARY = 'binary'
-    SHADES_OF_GRAY = 'gray'
-    RGB = 'rgb'
-    RGBA = 'rgba'
 
 
 class Image(Printable):
@@ -113,7 +106,7 @@ class Image(Printable):
         return new_image
 
     def apply_mask(self, mask: SpatialMask) -> 'Image':
-        new_image_matrix = mask.apply_mask(self.data.copy(), self.max_channel_color)
+        new_image_matrix = mask.apply_mask(self.data.copy(), self.max_channel_color, self.color_type)
         result = copy(self)
         result.data = new_image_matrix
         return result

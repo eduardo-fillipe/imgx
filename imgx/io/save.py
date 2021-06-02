@@ -18,7 +18,19 @@ def save_as_ppm(img: Image, output_file: str):
 
         file.write(f'{img.max_channel_color}\n')
 
-        for color in img.data.reshape(-1):
-            file.write(f'{color}\n')
+        c = 0
+        s = ''
+        if img.color_type == ImageColorType.BINARY:
+            data = img.data.reshape(-1)
+            for color in data:
+                s += f'{color}'
+                c += 1
+                if c == 70:
+                    s += '\n'
+                    c = 0
+            file.write(s)
+        else:
+            for color in img.data.reshape(-1):
+                file.write(f'{color}\n')
 
         file.write('\n')
