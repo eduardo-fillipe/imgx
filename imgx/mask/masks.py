@@ -229,14 +229,9 @@ class MedianSpatialMask(SpatialMask):
         j_start, j_stop = target_pixel[1] - padding, target_pixel[1] + padding
 
         if img_type == ImageColorType.BINARY:
-            sub_matrix = image_matrix[i_start:i_stop + 1, j_start:j_stop + 1].reshape(-1)
-            ones_qt = np.sum(sub_matrix)
-            if ((self.size * self.size) - ones_qt) >= ((percentile * (self.size * self.size))//100):
-                r = 0
-            else:
-                r = 1
-            # assert r == int(np.percentile(sub_matrix, percentile))
-            return r
+            ones_qt = np.sum(image_matrix[i_start:i_stop + 1, j_start:j_stop + 1])
+            return 0 if ((self.size * self.size) - ones_qt) >= ((percentile * (self.size * self.size))//100) else 1
+
         elif img_type == ImageColorType.RGB or img_type == ImageColorType.RGBA:
             sub_matrix = image_matrix[i_start:i_stop + 1, j_start:j_stop + 1, :3].reshape(-1, 3)
             rgb_result = np.percentile(sub_matrix, percentile, axis=0).astype(int)
