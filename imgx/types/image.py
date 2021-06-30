@@ -4,6 +4,7 @@ import seaborn as sns
 from copy import copy, deepcopy
 from imgx.mask.masks import SpatialMask
 from imgx.types.image_color_type import ImageColorType
+import imgx.morphology.operations as morph_operations
 
 
 class Printable:
@@ -156,6 +157,24 @@ class Image(Printable):
 
         result = copy(self)
         result.data = equalized_image
+        return result
+
+    def erode(self, structuring_element: np.ndarray) -> 'Image':
+        if self.color_type != ImageColorType.BINARY:
+            raise ValueError('Can not erode a not Binary image')
+
+        result = copy(self)
+        result.data = morph_operations.erode(self.data, structuring_element)
+
+        return result
+
+    def dilate(self, structuring_element: np.ndarray) -> 'Image':
+        if self.color_type != ImageColorType.BINARY:
+            raise ValueError('Can not dilate a not Binary image')
+
+        result = copy(self)
+        result.data = morph_operations.dilate(self.data, structuring_element)
+
         return result
 
     def plot_on_axe(self, ax: axes.Axes):
