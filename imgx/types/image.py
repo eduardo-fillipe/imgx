@@ -92,6 +92,20 @@ class Image(Printable):
             new_image.data = self.max_channel_color - self.data
         return new_image
 
+    def subtract(self, image: 'Image') -> 'Image':
+        if image.data.shape != self.data.shape:
+            raise ValueError('Images need to have the same size')
+
+        result_image = copy(self)
+        result_data = np.zeros(shape=self.data.shape)
+
+        for i in range(self.data.shape[0]):
+            for j in range(self.data.shape[1]):
+                result_data[i, j] = np.max(self.data[i, j] - image.data[i, j], 0)
+
+        result_image.data = result_data
+        return result_image
+
     def threshold(self, threshold: float = None) -> 'Image':
         if threshold is None:
             threshold = int(self.max_channel_color // 2)
