@@ -213,3 +213,10 @@ class Image(Printable):
 
         else:
             sns.histplot(self.data.reshape(-1), discrete=True, ax=ax)
+
+
+    def andd(self, img):
+        img_result = copy(self)
+        img_result.data = np.logical_and(self.data, img.data)
+        return img_result
+

@@ -32,10 +32,9 @@ def executar(normal_image_path, noised_image_path) :
 
 if __name__ == '__main__':
     print(f'first test case is starting')
-    executar('image_samples/normal/grupo_02_linhas_46_palavras_300.pbm', 'image_samples/noised/grupo_02_linhas_46_palavras_300.pbm')
+    executar('../image_samples/normal/grupo_02_linhas_46_palavras_300.pbm', 'image_samples/noised/grupo_02_linhas_46_palavras_300.pbm')
     print(f'second test case is starting')
-    executar('image_samples/normal/grupo_02_linhas_48_palavras_500.pbm', 'image_samples/noised/grupo_02_linhas_48_palavras_500.pbm')
+    executar('../image_samples/normal/grupo_02_linhas_48_palavras_500.pbm', 'image_samples/noised/grupo_02_linhas_48_palavras_500.pbm')
     print(f'third test case is starting')
-    executar('image_samples/normal/grupo_02_linhas_52_palavras_600.pbm', 'image_samples/noised/grupo_02_linhas_52_palavras_600.pbm')
-
+    executar('../image_samples/normal/grupo_02_linhas_52_palavras_600.pbm', 'image_samples/noised/grupo_02_linhas_52_palavras_600.pbm')
 
